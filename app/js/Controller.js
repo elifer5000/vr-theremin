@@ -25,23 +25,27 @@ export default class Controller {
         room.position.y = 3;
         this.view.scene.add( room );
 
-        this.addKeysToScene();
-
         this.highlightColor = new THREE.Color(0xFFFF00);
+
 
         for (let index = 0; index < this.view.renderingContext.controllers.length; index++) {
             const controller = this.view.renderingContext.controllers[index];
             controller.addEventListener('triggerdown', () => { this.onTriggerDown(index); });
             controller.addEventListener('menudown', () => { this.onMenuDown(index); });
         }
+        const loader = new THREE.FontLoader();
 
+        loader.load('resources/helvetiker_regular.typeface.json', ( font ) => {
+            console.log('font loaded');
+            this.addKeysToScene(font);
+        });
     }
 
     createKeyGeometry(isSharp) {
         return new THREE.BoxGeometry(isSharp ? this.keySharpWidth : this.keyWidth, this.keyHeight, this.keyLength);
     }
 
-    addKeysToScene() {
+    addKeysToScene(font) {
         this.notes = this.audio[0].getNotesWithPosition();
         this.rootObject = new THREE.Object3D();
         const baseMesh = new THREE.Mesh(new THREE.BoxGeometry(1.05*this.keyboardWidth, 1.05*this.keyHeight, 1.2*this.keyLength),
@@ -64,6 +68,18 @@ export default class Controller {
             this.notes[n].mesh = noteMesh;
             this.notes[n].isSharp = isSharp;
             this.notes[n].origColor = new THREE.Color(color);
+
+            if (!isSharp) {
+                const fontGeometry = new THREE.TextGeometry(n[0], {size: 0.015, height: 0.005, font});
+                const fontMesh = new THREE.Mesh(fontGeometry, new THREE.MeshStandardMaterial({color: 0x3661a5}));
+                fontMesh.position.copy(pos);
+                fontMesh.position.z -= this.keyLength / 2;
+                fontMesh.position.x -= 0.006;
+                fontMesh.position.y += this.keyHeight;
+
+                fontMesh.rotation.x -= Math.PI / 6;
+                this.rootObject.add(fontMesh);
+            }
         }
 
         this.rootObject.position.set(0.4, 0.5, -2);
