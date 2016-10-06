@@ -148,6 +148,10 @@ export default class AudioController {
         this.setSound(this.sounds[this.currentSound]);
     }
 
+    getSoundName() {
+        return this.sounds[this.currentSound].name;
+    }
+
     updateSoundWave(amps, phases) {
         const curveSin = new Float32Array(amps.length);
         const curveCos = new Float32Array(amps.length);

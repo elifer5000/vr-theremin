@@ -9,6 +9,7 @@ export default class Controller {
         this.keyHeight = 0.01;
         this.keyLength = 0.2;
 
+        this.soundNameMeshes = [ null, null ];
         this.audio = [];
         this.audio.push(new AudioController(this.keyboardWidth));
         this.audio.push(new AudioController(this.keyboardWidth));
@@ -36,8 +37,9 @@ export default class Controller {
         const loader = new THREE.FontLoader();
 
         loader.load('resources/helvetiker_regular.typeface.json', ( font ) => {
+            this.font = font;
             console.log('font loaded');
-            this.addKeysToScene(font);
+            this.addKeysToScene();
         });
     }
 
@@ -45,7 +47,7 @@ export default class Controller {
         return new THREE.BoxGeometry(isSharp ? this.keySharpWidth : this.keyWidth, this.keyHeight, this.keyLength);
     }
 
-    addKeysToScene(font) {
+    addKeysToScene() {
         this.notes = this.audio[0].getNotesWithPosition();
         this.rootObject = new THREE.Object3D();
         const baseMesh = new THREE.Mesh(new THREE.BoxGeometry(1.05*this.keyboardWidth, 1.05*this.keyHeight, 1.2*this.keyLength),
@@ -70,7 +72,7 @@ export default class Controller {
             this.notes[n].origColor = new THREE.Color(color);
 
             if (!isSharp) {
-                const fontGeometry = new THREE.TextGeometry(n[0], {size: 0.015, height: 0.005, font});
+                const fontGeometry = new THREE.TextGeometry(n[0], {size: 0.015, height: 0.005, font: this.font});
                 const fontMesh = new THREE.Mesh(fontGeometry, new THREE.MeshStandardMaterial({color: 0x3661a5}));
                 fontMesh.position.copy(pos);
                 fontMesh.position.z -= this.keyLength / 2;
@@ -81,7 +83,8 @@ export default class Controller {
                 this.rootObject.add(fontMesh);
             }
         }
-
+        this.updateSoundName(0);
+        this.updateSoundName(1);
         this.rootObject.position.set(0.4, 0.5, -2);
         // this.rootObject.rotation.set(0, 0, 0);
 
@@ -149,12 +152,39 @@ export default class Controller {
         }
     }
 
+    updateSoundName(index) {
+        if (!this.font) return;
+
+        if (this.soundNameMeshes[index]) {
+            this.rootObject.remove(this.soundNameMeshes[index]);
+        }
+
+        const fontSoundGeometry = new THREE.TextGeometry(this.audio[index].getSoundName(), {size: 0.03, height: 0.005, font: this.font});
+        const fontDelayGeometry = new THREE.TextGeometry(this.audio[index].isDelayEnabled ? 'delay on' : '', {size: 0.02, height: 0.005, font: this.font});
+
+        this.soundNameMeshes[index] = new THREE.Mesh(fontSoundGeometry, new THREE.MeshStandardMaterial({color: 0xb642f4}));
+        this.soundNameMeshes[index].position.z = -this.keyLength / 2;
+        this.soundNameMeshes[index].position.x = (index === 0) ? -this.keyboardWidth/3 : this.keyboardWidth/4.5;
+        this.soundNameMeshes[index].position.y = 7*this.keyHeight;
+        this.soundNameMeshes[index].rotation.x -= Math.PI / 6;
+
+        const delayMesh = new THREE.Mesh(fontDelayGeometry, new THREE.MeshStandardMaterial({color: 0xb642f4}));
+        delayMesh.position.y = -2.5*this.keyHeight;
+        this.soundNameMeshes[index].add(delayMesh);
+
+
+        this.rootObject.add(this.soundNameMeshes[index] );
+    }
+
+
     onTriggerDown(index) {
         this.audio[index].selectNextSound();
+        this.updateSoundName(index);
     }
 
     onMenuDown(index) {
         this.audio[index].toggleDelay();
+        this.updateSoundName(index);
     }
 
     onControllerMoved(controllers, head) {

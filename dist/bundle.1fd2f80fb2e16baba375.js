@@ -50006,6 +50006,7 @@ webpackJsonp([0,1],[
 	        this.keyHeight = 0.01;
 	        this.keyLength = 0.2;
 
+	        this.soundNameMeshes = [null, null];
 	        this.audio = [];
 	        this.audio.push(new _AudioController2.default(this.keyboardWidth));
 	        this.audio.push(new _AudioController2.default(this.keyboardWidth));
@@ -50041,8 +50042,9 @@ webpackJsonp([0,1],[
 	            var loader = new THREE.FontLoader();
 
 	            loader.load('resources/helvetiker_regular.typeface.json', function (font) {
+	                _this.font = font;
 	                console.log('font loaded');
-	                _this.addKeysToScene(font);
+	                _this.addKeysToScene();
 	            });
 	        }
 	    }, {
@@ -50052,7 +50054,7 @@ webpackJsonp([0,1],[
 	        }
 	    }, {
 	        key: 'addKeysToScene',
-	        value: function addKeysToScene(font) {
+	        value: function addKeysToScene() {
 	            this.notes = this.audio[0].getNotesWithPosition();
 	            this.rootObject = new THREE.Object3D();
 	            var baseMesh = new THREE.Mesh(new THREE.BoxGeometry(1.05 * this.keyboardWidth, 1.05 * this.keyHeight, 1.2 * this.keyLength), new THREE.MeshStandardMaterial({ color: 0x838380 }));
@@ -50073,7 +50075,7 @@ webpackJsonp([0,1],[
 	                this.notes[n].origColor = new THREE.Color(color);
 
 	                if (!isSharp) {
-	                    var fontGeometry = new THREE.TextGeometry(n[0], { size: 0.015, height: 0.005, font: font });
+	                    var fontGeometry = new THREE.TextGeometry(n[0], { size: 0.015, height: 0.005, font: this.font });
 	                    var fontMesh = new THREE.Mesh(fontGeometry, new THREE.MeshStandardMaterial({ color: 0x3661a5 }));
 	                    fontMesh.position.copy(pos);
 	                    fontMesh.position.z -= this.keyLength / 2;
@@ -50084,7 +50086,8 @@ webpackJsonp([0,1],[
 	                    this.rootObject.add(fontMesh);
 	                }
 	            }
-
+	            this.updateSoundName(0);
+	            this.updateSoundName(1);
 	            this.rootObject.position.set(0.4, 0.5, -2);
 	            // this.rootObject.rotation.set(0, 0, 0);
 
@@ -50155,14 +50158,40 @@ webpackJsonp([0,1],[
 	            }
 	        }
 	    }, {
+	        key: 'updateSoundName',
+	        value: function updateSoundName(index) {
+	            if (!this.font) return;
+
+	            if (this.soundNameMeshes[index]) {
+	                this.rootObject.remove(this.soundNameMeshes[index]);
+	            }
+
+	            var fontSoundGeometry = new THREE.TextGeometry(this.audio[index].getSoundName(), { size: 0.03, height: 0.005, font: this.font });
+	            var fontDelayGeometry = new THREE.TextGeometry(this.audio[index].isDelayEnabled ? 'delay on' : '', { size: 0.02, height: 0.005, font: this.font });
+
+	            this.soundNameMeshes[index] = new THREE.Mesh(fontSoundGeometry, new THREE.MeshStandardMaterial({ color: 0xb642f4 }));
+	            this.soundNameMeshes[index].position.z = -this.keyLength / 2;
+	            this.soundNameMeshes[index].position.x = index === 0 ? -this.keyboardWidth / 3 : this.keyboardWidth / 4.5;
+	            this.soundNameMeshes[index].position.y = 7 * this.keyHeight;
+	            this.soundNameMeshes[index].rotation.x -= Math.PI / 6;
+
+	            var delayMesh = new THREE.Mesh(fontDelayGeometry, new THREE.MeshStandardMaterial({ color: 0xb642f4 }));
+	            delayMesh.position.y = -2.5 * this.keyHeight;
+	            this.soundNameMeshes[index].add(delayMesh);
+
+	            this.rootObject.add(this.soundNameMeshes[index]);
+	        }
+	    }, {
 	        key: 'onTriggerDown',
 	        value: function onTriggerDown(index) {
 	            this.audio[index].selectNextSound();
+	            this.updateSoundName(index);
 	        }
 	    }, {
 	        key: 'onMenuDown',
 	        value: function onMenuDown(index) {
 	            this.audio[index].toggleDelay();
+	            this.updateSoundName(index);
 	        }
 	    }, {
 	        key: 'onControllerMoved',
@@ -50430,6 +50459,11 @@ webpackJsonp([0,1],[
 	            if (this.currentSound >= this.sounds.length) this.currentSound = 0;
 
 	            this.setSound(this.sounds[this.currentSound]);
+	        }
+	    }, {
+	        key: "getSoundName",
+	        value: function getSoundName() {
+	            return this.sounds[this.currentSound].name;
 	        }
 	    }, {
 	        key: "updateSoundWave",
