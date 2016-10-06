@@ -39,7 +39,17 @@ export default class VRRenderingContext extends RenderingContext {
     }
 
     addControllers() {
-        this.controllers = [];
+        this.controllers = [
+            new THREE.ViveController(0),
+            new THREE.ViveController(1)
+        ];
+
+        for (const controller of this.controllers) {
+            controller.realPosition = new THREE.Vector3();
+            controller.realRotation = new THREE.Euler();
+            controller.realScale = new THREE.Vector3();
+        }
+
         const loader = new THREE.OBJLoader();
         loader.setPath( 'models/vive-controller/' );
         loader.load( 'vr_controller_vive_1_5.obj', (object) => {
@@ -49,17 +59,9 @@ export default class VRRenderingContext extends RenderingContext {
             controllerMesh.material.map = texLoader.load( 'onepointfive_texture.png' );
             controllerMesh.material.specularMap = texLoader.load( 'onepointfive_spec.png' );
 
-            this.controllers = [
-                new THREE.ViveController(0),
-                new THREE.ViveController(1)
-            ];
-
             for (const controller of this.controllers) {
                 controller.add(object.clone());
                 controller.standingMatrix = this.controls.getStandingMatrix();
-                controller.realPosition = new THREE.Vector3();
-                controller.realRotation = new THREE.Euler();
-                controller.realScale = new THREE.Vector3();
                 this.scene.add(controller);
             }
         });

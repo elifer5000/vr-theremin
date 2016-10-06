@@ -50124,9 +50124,9 @@ webpackJsonp([0,1],[
 	                if (gamepad.buttons[0].touched) {
 	                    // gain = Math.log10(1 + 9 * (gamepad.axes[1] + 1) / 2);
 	                    // Let's try the opposite of log, x^2
-	                    var gainNormalized = (gamepad.axes[1] + 1) / 2;
+	                    var gainNormalized = 0.8 * (gamepad.axes[1] + 1) / 2 + 0.2;
 	                    gain = gainNormalized * gainNormalized;
-	                    console.log(gain);
+	                    // console.log(gain);
 	                    // detuneCents = 100*gamepad.axes[0];
 	                }
 	                audio.detune(detuneCents);
@@ -52551,7 +52551,35 @@ webpackJsonp([0,1],[
 	        value: function addControllers() {
 	            var _this3 = this;
 
-	            this.controllers = [];
+	            this.controllers = [new THREE.ViveController(0), new THREE.ViveController(1)];
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = this.controllers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var controller = _step.value;
+
+	                    controller.realPosition = new THREE.Vector3();
+	                    controller.realRotation = new THREE.Euler();
+	                    controller.realScale = new THREE.Vector3();
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
 	            var loader = new THREE.OBJLoader();
 	            loader.setPath('models/vive-controller/');
 	            loader.load('vr_controller_vive_1_5.obj', function (object) {
@@ -52561,34 +52589,29 @@ webpackJsonp([0,1],[
 	                controllerMesh.material.map = texLoader.load('onepointfive_texture.png');
 	                controllerMesh.material.specularMap = texLoader.load('onepointfive_spec.png');
 
-	                _this3.controllers = [new THREE.ViveController(0), new THREE.ViveController(1)];
-
-	                var _iteratorNormalCompletion = true;
-	                var _didIteratorError = false;
-	                var _iteratorError = undefined;
+	                var _iteratorNormalCompletion2 = true;
+	                var _didIteratorError2 = false;
+	                var _iteratorError2 = undefined;
 
 	                try {
-	                    for (var _iterator = _this3.controllers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                        var controller = _step.value;
+	                    for (var _iterator2 = _this3.controllers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                        var controller = _step2.value;
 
 	                        controller.add(object.clone());
 	                        controller.standingMatrix = _this3.controls.getStandingMatrix();
-	                        controller.realPosition = new THREE.Vector3();
-	                        controller.realRotation = new THREE.Euler();
-	                        controller.realScale = new THREE.Vector3();
 	                        _this3.scene.add(controller);
 	                    }
 	                } catch (err) {
-	                    _didIteratorError = true;
-	                    _iteratorError = err;
+	                    _didIteratorError2 = true;
+	                    _iteratorError2 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion && _iterator.return) {
-	                            _iterator.return();
+	                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                            _iterator2.return();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError) {
-	                            throw _iteratorError;
+	                        if (_didIteratorError2) {
+	                            throw _iteratorError2;
 	                        }
 	                    }
 	                }

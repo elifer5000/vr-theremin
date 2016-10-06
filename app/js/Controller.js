@@ -118,9 +118,9 @@ export default class Controller {
             if (gamepad.buttons[0].touched) {
                 // gain = Math.log10(1 + 9 * (gamepad.axes[1] + 1) / 2);
                 // Let's try the opposite of log, x^2
-                const gainNormalized = (gamepad.axes[1] + 1) / 2;
+                const gainNormalized = 0.8*(gamepad.axes[1] + 1) / 2 + 0.2;
                 gain = gainNormalized * gainNormalized;
-                console.log(gain);
+                // console.log(gain);
                 // detuneCents = 100*gamepad.axes[0];
             }
             audio.detune(detuneCents);
