@@ -30,7 +30,8 @@ const config = {
     module: {
         noParse: [/app\/bin/],
         loaders: [
-            { test: require.resolve('three'),
+            {
+                test: require.resolve('three'),
                 loader: 'expose?THREE'
             },
             {

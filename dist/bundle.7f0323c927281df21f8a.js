@@ -50126,9 +50126,9 @@ webpackJsonp([0,1],[
 	                var detuneCents = 0;
 	                if (gamepad.buttons[0].touched) {
 	                    // gain = Math.log10(1 + 9 * (gamepad.axes[1] + 1) / 2);
-	                    // Let's try the opposite of log, x^2
-	                    var gainNormalized = 0.8 * (gamepad.axes[1] + 1) / 2 + 0.2;
-	                    gain = gainNormalized * gainNormalized;
+	                    // Let's try the opposite of log, x^3
+	                    var gainNormalized = (Math.max(-0.5, gamepad.axes[1]) + 0.5) / 1.5;
+	                    gain = gainNormalized * gainNormalized * gainNormalized * gainNormalized;
 	                    // console.log(gain);
 	                    // detuneCents = 100*gamepad.axes[0];
 	                }
@@ -50146,16 +50146,22 @@ webpackJsonp([0,1],[
 	            }
 
 	            audio.onChange(posLocal.x, gain);
+	            var currentNote = null;
 	            for (var n in this.notes) {
 	                var note = this.notes[n];
 
 	                if (Math.abs(posLocal.x - note.position.x) < 0.005) {
 	                    note.mesh.material.color = this.highlightColor;
-	                    //if (gamepad) {
-	                    //    gamepad.haptics[0].vibrate(0.05, 25);
-	                    //}
+
+	                    if (gamepad && gamepad.haptics && vrController.lastNote !== note) {
+	                        gamepad.haptics[0].vibrate(0.05, 25);
+	                    }
+	                    currentNote = note;
+	                    break;
 	                }
 	            }
+
+	            vrController.lastNote = currentNote;
 	        }
 	    }, {
 	        key: 'updateSoundName',
@@ -50399,7 +50405,7 @@ webpackJsonp([0,1],[
 	        this.LFOGainNode = this.context.createGain();
 	        this.LFOGainNode.gain.value = 0.3;
 
-	        this.convolver = this.context.createConvolver();
+	        // this.convolver = this.context.createConvolver();
 
 	        this.gainNode = this.context.createGain();
 	        this.gainNode.gain.value = 0;
@@ -50421,7 +50427,7 @@ webpackJsonp([0,1],[
 	        this.delay.connect(this.delayFeedback);
 	        this.delayFeedback.connect(this.delay);
 
-	        this.initBufferLoader();
+	        // this.initBufferLoader();
 
 	        this.LFO.connect(this.LFOGainNode);
 
@@ -50430,9 +50436,11 @@ webpackJsonp([0,1],[
 
 	        this.gainNode.connect(this.filter);
 	        this.filter.connect(this.volNode);
-	        this.volNode.connect(this.convolver);
-	        // this.volNode.connect(this.context.destination);
-	        this.convolver.connect(this.context.destination);
+	        this.volNode.connect(this.context.destination);
+	        // Reverb doesn't sound so good. Disconnecting for now. Maybe tunajs sounds better.
+	        // Problem is this pure wet sound. Should be 60% dry, 40% wet or something like that.
+	        // this.volNode.connect(this.convolver);
+	        // this.convolver.connect(this.context.destination);
 	        this.delay.connect(this.context.destination);
 
 	        this.LFO.start();
@@ -50487,7 +50495,7 @@ webpackJsonp([0,1],[
 	            var _this = this;
 
 	            var bufferLoader = new BufferLoader(this.context, [//List of preloaded impulse files
-	            './resources/arena.wav'], function (bufferList) {
+	            './resources/ir_rev_short.wav'], function (bufferList) {
 	                var impulseResponses = [];
 	                for (var i = 0; i < bufferList.length; i++) {
 	                    impulseResponses.push(bufferList[i]);
@@ -50517,9 +50525,9 @@ webpackJsonp([0,1],[
 	        value: function setDelay(val) {
 	            try {
 	                if (val) {
-	                    this.convolver.connect(this.delay);
+	                    this.volNode.connect(this.delay);
 	                } else {
-	                    this.convolver.disconnect(this.delay);
+	                    this.volNode.disconnect(this.delay);
 	                }
 	            } catch (error) {
 	                console.log(error);

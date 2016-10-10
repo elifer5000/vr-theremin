@@ -120,9 +120,9 @@ export default class Controller {
             let detuneCents = 0;
             if (gamepad.buttons[0].touched) {
                 // gain = Math.log10(1 + 9 * (gamepad.axes[1] + 1) / 2);
-                // Let's try the opposite of log, x^2
-                const gainNormalized = 0.8*(gamepad.axes[1] + 1) / 2 + 0.2;
-                gain = gainNormalized * gainNormalized;
+                // Let's try the opposite of log, x^3
+                const gainNormalized = (Math.max(-0.5, gamepad.axes[1]) + 0.5) / 1.5;
+                gain = gainNormalized * gainNormalized * gainNormalized * gainNormalized;
                 // console.log(gain);
                 // detuneCents = 100*gamepad.axes[0];
             }
@@ -140,16 +140,22 @@ export default class Controller {
         }
 
         audio.onChange(posLocal.x, gain);
+        let currentNote = null;
         for (const n in this.notes) {
             const note = this.notes[n];
 
             if (Math.abs(posLocal.x - note.position.x) < 0.005) {
                 note.mesh.material.color = this.highlightColor;
-                //if (gamepad) {
-                //    gamepad.haptics[0].vibrate(0.05, 25);
-                //}
+
+                if (gamepad && gamepad.haptics && vrController.lastNote !== note) {
+                    gamepad.haptics[0].vibrate(0.05, 25);
+                }
+                currentNote = note;
+                break;
             }
         }
+
+        vrController.lastNote = currentNote;
     }
 
     updateSoundName(index) {

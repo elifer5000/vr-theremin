@@ -82,7 +82,7 @@ export default class AudioController {
         this.LFOGainNode = this.context.createGain();
         this.LFOGainNode.gain.value = 0.3;
 
-        this.convolver = this.context.createConvolver();
+        // this.convolver = this.context.createConvolver();
         
         this.gainNode = this.context.createGain();
         this.gainNode.gain.value = 0;
@@ -104,7 +104,7 @@ export default class AudioController {
         this.delay.connect(this.delayFeedback);
         this.delayFeedback.connect(this.delay);
 
-        this.initBufferLoader();
+        // this.initBufferLoader();
 
         this.LFO.connect(this.LFOGainNode);
 
@@ -113,9 +113,11 @@ export default class AudioController {
 
         this.gainNode.connect(this.filter);
         this.filter.connect(this.volNode);
-        this.volNode.connect(this.convolver);
-        // this.volNode.connect(this.context.destination);
-        this.convolver.connect(this.context.destination);
+        this.volNode.connect(this.context.destination);
+        // Reverb doesn't sound so good. Disconnecting for now. Maybe tunajs sounds better.
+        // Problem is this pure wet sound. Should be 60% dry, 40% wet or something like that.
+        // this.volNode.connect(this.convolver);
+        // this.convolver.connect(this.context.destination);
         this.delay.connect(this.context.destination);
 
         this.LFO.start();
@@ -170,7 +172,7 @@ export default class AudioController {
     initBufferLoader() {
         const bufferLoader = new BufferLoader(this.context,
             [  //List of preloaded impulse files
-            './resources/arena.wav'
+            './resources/ir_rev_short.wav'
             ],
             (bufferList) => {
                 const impulseResponses = [];
@@ -200,9 +202,9 @@ export default class AudioController {
     setDelay(val) {
         try {
             if (val) {
-                this.convolver.connect(this.delay);
+                this.volNode.connect(this.delay);
             } else {
-                this.convolver.disconnect(this.delay);
+                this.volNode.disconnect(this.delay);
             }
         } catch(error) {
             console.log(error);
