@@ -2,9 +2,11 @@
 
 Inspired by the [ondes martenot](https://www.youtube.com/watch?v=v0aflcF0-ys) this is a WebVR based application that attempts to recreate the experience of playing one.
 
-[Here's a video](https://youtu.be/kfknkYkHuNs)
+[Here's a video](https://www.youtube.com/watch?v=7IabQXipfS0)
 
-[And here's a hosted demo](https://elifer5000.github.io/vr-ondes-martenot/dist/index.html)
+[And here's a hosted demo](https://elifer5000.github.io/vr-ondes-martenot/dist/index.html)  ([emulated version](https://elifer5000.github.io/vr-ondes-martenot/dist/index.html?mode=emu))
+
+![pic](screenshot.png)
 
 ## Requirements
 * An HTC Vive

@@ -26,7 +26,8 @@ export default class StandardRenderingContext extends RenderingContext {
         return this.camera.rotation;
     }
 
-    onRender() {
+    onRender(cb) {
+        requestAnimationFrame(cb);
         const delta = this.clock.getDelta();
         this.controls.update(delta);
         this.renderer.render(this.scene, this.camera);

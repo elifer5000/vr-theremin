@@ -27,9 +27,7 @@ export default class MainView {
     }
 
     render() {
-        requestAnimationFrame(() => this.render());
-
-        this.renderingContext.onRender();
+        this.renderingContext.onRender(() => this.render());
     }
 
     onWindowResize() {

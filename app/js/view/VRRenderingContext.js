@@ -1,7 +1,7 @@
 import '../lib/WEBVR';
 import '../../../node_modules/three/examples/js/controls/VRControls';
 import '../../../node_modules/three/examples/js/effects/VREffect';
-import '../../../node_modules/three/examples/js/ViveController';
+import '../../../node_modules/three/examples/js/vr/ViveController';
 import '../../../node_modules/three/examples/js/loaders/OBJLoader';
 import RenderingContext from './RenderingContext';
 
@@ -15,14 +15,15 @@ export default class VRRenderingContext extends RenderingContext {
 
         if (THREE.WEBVR.isAvailable() === true) {
             document.body.appendChild( THREE.WEBVR.getButton( this.effect ) );
-            setTimeout(() => {
-                this.effect.requestPresent();
-            }, 1000);
+            // setTimeout(() => {
+            //     this.effect.requestPresent();
+            // }, 1000);
         }
         this.addControllers();
     }
 
-    onRender() {
+    onRender(cb) {
+        this.effect.requestAnimationFrame(cb);
         this.controls.update();
         const head = { position: this.getHeadsetPosition(), rotation: this.getHeadsetRotation() };
         for (let i = 0; i < this.controllers.length; i++) {

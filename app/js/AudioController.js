@@ -88,7 +88,7 @@ export default class AudioController {
         this.gainNode.gain.value = 0;
 
         this.volNode = this.context.createGain();
-        this.volNode.gain.value = 0.2;
+        this.volNode.gain.value = 0.15;
 
         this.filter = this.context.createBiquadFilter();
         this.filter.type = 'lowpass';
@@ -137,6 +137,15 @@ export default class AudioController {
 
         this.isDelayEnabled = false;
         // this.setDelay(true);
+
+        this.analyser = this.context.createAnalyser();
+        this.analyser.fftSize = 2048;
+        this.analyser.smoothingTimeConstant = 0.3;
+        this.volNode.connect(this.analyser);
+        this.delay.connect(this.analyser);
+        const bufferLength = this.analyser.frequencyBinCount;
+        this.floatDataArray = new Float32Array(bufferLength);
+        this.uintDataArray = new Uint8Array(bufferLength);
     }
 
     setSound(sound) {
@@ -231,6 +240,34 @@ export default class AudioController {
         }
 
         return this.notesToFreq;
+    }
+
+    getWaveFormData() {
+        this.analyser.getFloatTimeDomainData(this.floatDataArray);
+
+        return this.floatDataArray;
+    }
+
+    getFrequencyData() {
+        this.analyser.getByteFrequencyData(this.uintDataArray);
+
+        return this.uintDataArray;
+    }
+
+    getVolume() {
+        this.getWaveFormData();
+        let max = 0;
+        const length = this.floatDataArray.length;
+
+        for (let i = 0; i < length; i++) {
+            max = Math.max(Math.abs(this.floatDataArray[i]), max);
+        }
+
+        return max;
+    }
+
+    getFrequencyStep() {
+        return this.context.sampleRate / this.analyser.fftSize;
     }
 
     _calculateFrequency(val) {

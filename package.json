@@ -26,6 +26,6 @@
     "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.21.0",
     "jquery": "^3.0.0",
-    "three": "^0.81.0"
+    "three": "^0.82.0"
   }
 }
