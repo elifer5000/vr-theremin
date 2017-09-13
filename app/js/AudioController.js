@@ -126,10 +126,11 @@ export default class AudioController {
         this.sounds = [
             { name: 'sine', amp: [1.0, 1.0], phase: [0.0, 0.0]},
             { name: 'trapezium', amp: [1.273, 0.993, 0.0, 0.314, 0.0, 0.168, 0.0, 0.101, 0.0, 0.060, 0.0, 0.033], phase: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-            { name: 'violin', amp: [0.49, 0.995, 0.94, 0.425, 0.480, 0, 0.365, 0.04, 0.085, 0, 0.09, 0], phase: [0, 0, Math.PI / 2, 0, Math.PI / 2, 0, Math.PI / 2, 0, Math.PI / 2, 0, Math.PI / 2, 0]},
+            { name: 'violin', amp: [0.49, 0.995, 0.94, 0.425, 0.480, 0, 0.365, 0.04, 0.085, 0, 0.09, 0], phase: [0,0,Math.PI/2,0,Math.PI/2,0,Math.PI/2,0,Math.PI/2,0,Math.PI/2,0]},
             { name: 'square', amp: [4/Math.PI,1,0,0.3333,0,0.2,0,0.1429,0,0.1111,0,0.0909], phase: [0,0,0,0,0,0,0,0,0,0,0,0]},
             { name: 'triangle', amp: [0.81,1,0,0.11111,0,0.04,0,0.02041,0,0.0123,0,0.0083], phase: [0,Math.PI/2,0,Math.PI/2,0,Math.PI/2,0,Math.PI/2,0,Math.PI/2,0,Math.PI/2]},
-            { name: 'sawtooth', amp: [2/Math.PI,1,0.5,0.333,0.25,0.2,0.1667,0.1429,0.125,0.1111,0.1,0.0909], phase: [0,0,0,0,0,0,0,0,0,0,0,0]}
+            { name: 'sawtooth', amp: [2/Math.PI,1,0.5,0.333,0.25,0.2,0.1667,0.1429,0.125,0.1111,0.1,0.0909], phase: [0,0,0,0,0,0,0,0,0,0,0,0]},
+            { name: 'impulse', amp: [0.18,1,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1,0], phase: [0,0,Math.PI*1.5,Math.PI,Math.PI/2,0,Math.PI*1.5,Math.PI,Math.PI/2,0,Math.PI*1.5,Math.PI]}
         ];
 
         this.currentSound = 0;
