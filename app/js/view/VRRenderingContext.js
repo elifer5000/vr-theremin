@@ -15,9 +15,6 @@ export default class VRRenderingContext extends RenderingContext {
 
         if (THREE.WEBVR.isAvailable() === true) {
             document.body.appendChild( THREE.WEBVR.getButton( this.effect ) );
-            // setTimeout(() => {
-            //     this.effect.requestPresent();
-            // }, 1000);
         }
         this.addControllers();
     }
@@ -60,9 +57,16 @@ export default class VRRenderingContext extends RenderingContext {
             controllerMesh.material.map = texLoader.load( 'onepointfive_texture.png' );
             controllerMesh.material.specularMap = texLoader.load( 'onepointfive_spec.png' );
 
+            const markerOnTrackpadGeo = new THREE.SphereGeometry(0.003, 16, 16);
+            const markerOnTrackpadMesh = new THREE.Mesh(markerOnTrackpadGeo, new THREE.MeshStandardMaterial('green'));
+            markerOnTrackpadMesh.name = 'markerPad';
+            markerOnTrackpadMesh.visible = false;
+            controllerMesh.add(markerOnTrackpadMesh);
+
             for (const controller of this.controllers) {
                 controller.add(object.clone());
                 controller.standingMatrix = this.controls.getStandingMatrix();
+                controller.markerOnPad = controller.children[0].children[0].children[0];
                 this.scene.add(controller);
             }
         });

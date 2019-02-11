@@ -45,6 +45,9 @@ BufferLoader.prototype.load = function() {
   this.loadBuffer(this.urlList[i], i);
 };
 
+var allowedNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+// var allowedNotes = ['B', 'C#', 'D', 'E', 'F#', 'G', 'A']; // Bm scale
+
 function mapNotesToFrequency() {
     var baseFreq = 440; // A4
     var baseSteps = 9; // A
@@ -58,6 +61,7 @@ function mapNotesToFrequency() {
     for (var oct = octaveStart; oct <= octaveEnd; oct++) {
         for (var step = 0; step < 12; step++) {
             var freq = baseFreq * Math.pow(2, (oct*12 + step - baseOctave*12 - baseSteps) / 12);
+            if (!allowedNotes.some(x => x === notes[step])) continue;
 
             notesFreqMap[notes[step] + oct.toString()] = { freq: freq, step: oct*12 + step };
         }
@@ -95,6 +99,7 @@ export default class AudioController {
         this.filter.frequency.value = 1800;
         // this.filter.Q.value = 5;
 
+        // LFO -> VCO -> VCA -> Filter -> Volume -> Delay
         this.delay = this.context.createDelay();
         this.delay.delayTime.value = 0.3;
 
@@ -198,7 +203,8 @@ export default class AudioController {
     onChange(pos, gain) {
         if (pos !== null) {
             const freq = this._calculateFrequency(pos + this.width / 2);
-            this.oscillator.frequency.value = freq;
+            // this.oscillator.frequency.value = freq;
+            this.oscillator.frequency.setTargetAtTime(freq, this.context.currentTime, 0.01);
         }
         if (gain !== null) {
             this.gainNode.gain.value = this._calculateGain(gain);
