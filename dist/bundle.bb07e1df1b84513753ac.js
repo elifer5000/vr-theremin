@@ -50553,7 +50553,7 @@ webpackJsonp([0,1],[
 
 	        this.keyboardWidth = 1.0;
 	        this.keyWidth = 0.0075;
-	        this.keySharpWidth = 0.005;
+	        this.keySharpWidth = 0.0070;
 	        this.keyHeight = 0.01;
 	        this.keyLength = 0.2;
 
@@ -50805,16 +50805,29 @@ webpackJsonp([0,1],[
 	            var gamepad = vrController.getGamepad();
 	            if (gamepad) {
 	                gain = 0;
-	                var detuneCents = 0;
+	                // let detuneCents = 0;
+	                var markerOnPad = vrController.markerOnPad;
 	                if (gamepad.buttons[0].touched) {
 	                    // gain = Math.log10(1 + 9 * (gamepad.axes[1] + 1) / 2);
 	                    // Let's try the opposite of log, x^4
-	                    var gainNormalized = (Math.max(-0.5, gamepad.axes[1]) + 0.5) / 1.5;
+	                    // Axes are in the [-1, 1] range
+	                    //const gainNormalized = (Math.max(-0.5, gamepad.axes[1]) + 0.5) / 1.5; // Normalizes to the [0, 1] range, leaving the bottom 1/4th of the pad unused (=0)
+	                    var gainNormalized = 0.5 * gamepad.axes[1] + 0.5; // Normalize to the [0, 1] range
 	                    gain = gainNormalized * gainNormalized * gainNormalized;
 	                    // console.log(gain);
 	                    // detuneCents = 100*gamepad.axes[0];
+
+	                    var newPosition = new THREE.Vector3(0.0, 0.003785, 0.049204); // Center position
+	                    newPosition.x = -0.020221 + (0.020221 + 0.020221) * (0.5 * gamepad.axes[0] + 0.5);
+	                    newPosition.y = 0.002646 + (0.007248 - 0.002646) * (0.5 * gamepad.axes[1] + 0.5);
+	                    newPosition.z = 0.069432 + (0.029242 - 0.069432) * (0.5 * gamepad.axes[1] + 0.5);
+
+	                    markerOnPad.position.copy(newPosition);
+	                    markerOnPad.visible = true;
+	                } else {
+	                    markerOnPad.visible = false;
 	                }
-	                audio.detune(detuneCents);
+	                // audio.detune(detuneCents);
 	            }
 
 	            var posLocal = pos.clone();
@@ -51055,6 +51068,9 @@ webpackJsonp([0,1],[
 	    }
 	};
 
+	var allowedNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+	// var allowedNotes = ['B', 'C#', 'D', 'E', 'F#', 'G', 'A']; // Bm scale
+
 	function mapNotesToFrequency() {
 	    var baseFreq = 440; // A4
 	    var baseSteps = 9; // A
@@ -51068,6 +51084,9 @@ webpackJsonp([0,1],[
 	    for (var oct = octaveStart; oct <= octaveEnd; oct++) {
 	        for (var step = 0; step < 12; step++) {
 	            var freq = baseFreq * Math.pow(2, (oct * 12 + step - baseOctave * 12 - baseSteps) / 12);
+	            if (!allowedNotes.some(function (x) {
+	                return x === notes[step];
+	            })) continue;
 
 	            notesFreqMap[notes[step] + oct.toString()] = { freq: freq, step: oct * 12 + step };
 	        }
@@ -51107,6 +51126,7 @@ webpackJsonp([0,1],[
 	        this.filter.frequency.value = 1800;
 	        // this.filter.Q.value = 5;
 
+	        // LFO -> VCO -> VCA -> Filter -> Volume -> Delay
 	        this.delay = this.context.createDelay();
 	        this.delay.delayTime.value = 0.3;
 
@@ -51207,7 +51227,8 @@ webpackJsonp([0,1],[
 	        value: function onChange(pos, gain) {
 	            if (pos !== null) {
 	                var freq = this._calculateFrequency(pos + this.width / 2);
-	                this.oscillator.frequency.value = freq;
+	                // this.oscillator.frequency.value = freq;
+	                this.oscillator.frequency.setTargetAtTime(freq, this.context.currentTime, 0.01);
 	            }
 	            if (gain !== null) {
 	                this.gainNode.gain.value = this._calculateGain(gain);
@@ -53313,9 +53334,6 @@ webpackJsonp([0,1],[
 
 	            if (THREE.WEBVR.isAvailable() === true) {
 	                document.body.appendChild(THREE.WEBVR.getButton(this.effect));
-	                // setTimeout(() => {
-	                //     this.effect.requestPresent();
-	                // }, 1000);
 	            }
 	            this.addControllers();
 	        }
@@ -53381,6 +53399,12 @@ webpackJsonp([0,1],[
 	                controllerMesh.material.map = texLoader.load('onepointfive_texture.png');
 	                controllerMesh.material.specularMap = texLoader.load('onepointfive_spec.png');
 
+	                var markerOnTrackpadGeo = new THREE.SphereGeometry(0.003, 16, 16);
+	                var markerOnTrackpadMesh = new THREE.Mesh(markerOnTrackpadGeo, new THREE.MeshStandardMaterial('green'));
+	                markerOnTrackpadMesh.name = 'markerPad';
+	                markerOnTrackpadMesh.visible = false;
+	                controllerMesh.add(markerOnTrackpadMesh);
+
 	                var _iteratorNormalCompletion2 = true;
 	                var _didIteratorError2 = false;
 	                var _iteratorError2 = undefined;
@@ -53391,6 +53415,7 @@ webpackJsonp([0,1],[
 
 	                        controller.add(object.clone());
 	                        controller.standingMatrix = _this2.controls.getStandingMatrix();
+	                        controller.markerOnPad = controller.children[0].children[0].children[0];
 	                        _this2.scene.add(controller);
 	                    }
 	                } catch (err) {
